@@ -42,5 +42,38 @@ CHIP ALU {
         ng; // 1 if (out < 0),  0 otherwise
 
     PARTS:
-   // Put you code here:
+	// do zx, nx
+	// first zx selects 0 or x
+	Mux16(a=x, b=false, sel=zx, out=x1);
+	// then nx selects between notx1 and x1
+	Not16(in=x1, out=notx1);
+	Mux16(a=x1, b=notx1, sel=nx, out=x2);
+	
+	// Do the same for y
+	Mux16(a=y, b=false, sel=zy, out=y1);
+	Not16(in=y1, out=noty1);
+	Mux16(a=y1, b=noty1, sel=ny, out=y2);
+	
+	// Now and them and add them then choose
+	// which one to output
+	And16(a=x2, b=y2, out=xandy);
+	Add16(a=x2, b=y2, out=xaddy);
+	Mux16(a=xandy, b=xaddy, sel=f, out=xy);
+	
+	// let no select between xy and notxy.
+	Not16(in=xy, out=notxy);
+	Mux16(a=xy, b=notxy, sel=no, out=tempout, out[0..7]=zr1, out[8..15]=zr2);
+	
+	// compare tempout against true. If most sig bit
+	// == 1 then ng= 1.
+	And16(a=true, b=tempout, out[0..14]=throw, out[15]=ng);
+	
+	// for zr just check if any of tempout bits are 1. Then negate it
+	Or8Way(in=zr1, out=zr1or);
+	Or8Way(in=zr2, out=zr2or);
+	Or(a=zr1or, b=zr2or, out=notzr);
+	Not(in=notzr, out=zr);
+	
+	// tempout -> output
+	Or16(a=tempout, b=false, out=out);
 }
