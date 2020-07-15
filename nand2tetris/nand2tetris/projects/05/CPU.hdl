@@ -39,5 +39,38 @@ CHIP CPU {
         pc[15];          // address of next instruction
 
     PARTS:
-    // Put your code here:
+	// Decode part.
+    Not(in=instruction[15], out=notinstruct);
+	Or(a=notinstruct, b=instruction[5], out=intoa);
+	And(a=instruction[15], b=instruction[4], out=intod);
+	And(a=instruction[15], b=instruction[3], out=writeM);
+	And(a=instruction[15], b=instruction[12], out=aorm);
+	
+	Mux16(a=instruction, b=aluout, sel=instruction[15], out=mux1);
+	ARegister(in=mux1, load=intoa, out=areg);
+	Mux16(a=areg, b=inM, sel=aorm, out=in2alu);
+	ALU(x=dreg, y=in2alu, zx=instruction[11], zy=instruction[9], nx=instruction[10],
+		ny=instruction[8], f=instruction[7], no=instruction[6],out=aluout, zr=zralu, ng=ngalu);
+	DRegister(in=aluout, load=intod, out=dreg);
+	
+	Or16(a=aluout, b=false, out=outM);
+	Or16(a=areg, b=false, out[0..14]=addressM, out[15]=throw);
+	
+	// Logic for counter. Check if any j bits requirements are fulfilled.
+	And(a=instruction[15], b=instruction[0], out=jgt);
+	Not(in=ngalu, out=pos);
+	Not(in=zralu, out=notzr);
+	And(a=pos, b=notzr, out=equal);
+	And(a=equal, b=jgt, out=j3);
+	
+	And(a=instruction[15], b=instruction[1], out=jeq);
+	And(a=jeq, b=zralu, out=j2);
+	
+	And(a=instruction[15], b=instruction[2], out=jlt);
+	And(a=jlt, b=ngalu, out=j1);
+	
+	Or(a=j1, b=j2, out=jumptemp);
+	Or(a=jumptemp, b=j3, out=jump);
+	
+	PC(in=areg, inc=true, load=jump, reset=reset, out[0..14]=pc, out[15]=throw2);
 }
