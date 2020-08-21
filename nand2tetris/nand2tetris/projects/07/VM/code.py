@@ -2,15 +2,18 @@
 
 class Code:
 
-    def __init__(self):
+    def __init__(self, file):
 
-        self.writer = None
+        self.writer = open(file, 'w')
         self.filename = None
 
+    # Writes bootstrap code which init registers and calls
+    # main function.
+    def write_init(self):
+        pass
 
     def set_file_name(self, name):
 
-        self.writer = open(name, 'w')
         self.filename = name
         self.unique_label = 0        # Handles multiple arithmetic operations so if you have double
                                      # equality each one has a unique label.
@@ -246,6 +249,36 @@ class Code:
                 self.decrement_sp()
                 self.writer.write('@' + self.filename + '.' + str(index) + '\n')
                 self.writer.write('M=D\n')
+
+    # Writes assembly code that effects label command.
+    def write_label(self, label):
+        
+        self.writer.write('(' + label + ')\n')
+
+    # Writes assembly code that effects goto command.
+    def write_goto(self, label):
+
+        self.writer.write('@' + label + '\n')
+        self.writer.write('0;JMP\n')
+
+    # Pops off stack. If value is not 0 go to loop.
+    def write_if(self, label):
+
+        self.decrement_sp()
+        self.writer.write('@' + label + '\n')        
+        self.writer.write('D;JNE\n')          # if top most element off stack =! 0 then jump.
+
+    # Writes assembly code that calls a function.
+    def write_call(self, label):
+        pass
+
+    # Writes assembly code that effects return command.
+    def write_return(self):
+        pass
+
+    # Writes assembly code that effects function command.
+    def write_function(self, name, num_local_vars):
+        pass
 
     def close(self):
 
