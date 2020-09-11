@@ -1,0 +1,32 @@
+class Main {
+	
+	function void main() {
+		var String word;
+		var int length, counter, avail_x;
+		
+		do Output.moveCursor(22, 5);
+		do Output.printString("Enter character here: ");
+		
+		do Screen.drawRectangle(345, 200, 450, 215);
+		do Screen.drawRectangle(345, 20, 360, 200);
+		do Screen.drawRectangle(345, 5, 400, 20);
+		do Screen.drawLine(400, 20, 400, 50);
+
+		do Screen.drawCircle(400, 75, 25);
+				//      x1   y1    x2   y2
+		do Screen.drawRectangle(395, 100, 405, 150);    // Body
+		do Screen.drawRectangle(375, 115, 395, 120);    // left arm
+		do Screen.drawRectangle(405, 115, 425, 120);
+		do Screen.drawRectangle(395, 150, 397, 180);    // left leg
+		do Screen.drawRectangle(403, 150, 405, 180);    // right leg
+
+		let word = "Computing";
+		let length = word.length();
+		let counter = 0;
+		while (counter < length) {
+			do Screen.drawRectangle((counter * 25) + 5, 5, (counter * 25) + 25, 25);
+			let counter = counter + 1;
+		}
+		return;
+	}
+}

@@ -11,17 +11,22 @@ class Parser:
         self.commands = []
         self.current_func = ['null']                                 # Behaves as a stack.
         self.labels = []
-        self.functions = []
         self.forward_pass()
         self.second_pass()
         self.arithmetic_c = ['add', 'sub', 'neg', 'eq', 'gt',
                              'lt', 'and', 'or', 'not']
         self.segments = ['argument', 'local', 'static', 'constant',
                          'this', 'that', 'pointer', 'temp']
-    
+        
     def forward_pass(self):
         
         for line in self.file:
+            line = line.replace('\n','')
+            line = line.replace('\t','')
+            if '//' in line:
+                index = line.index('//')
+                line = line[:index]
+                
             if 'function' in line:
                 words = line.split()
                 self.current_func.append(words[1])
@@ -34,19 +39,16 @@ class Parser:
                 new_label = self.current_func[-1] + '$' + words[1]
                 line = line.replace(words[1], new_label)
                 self.labels.append(new_label)
-                            
-            # Remove all whitespace and comments.
-            line = line.replace(' ','')
-            line = line.replace('\n','')
-            line = line.replace('\t','')
+
+            line = line.replace('\t', '')
+            line = line.replace('\n', '')
             if '//' in line:
                 index = line.index('//')
                 line = line[:index]
-
-            if line == '':
+            if line.replace(' ','') == '':
                 continue
-                
             self.commands.append(line)
+            continue
 
     def second_pass(self):
 
@@ -79,9 +81,11 @@ class Parser:
 
     def command_type(self):
 
-        for command in self.arithmetic_c:
-            if command == self.pointer:
-                return 'C_ARITHMETIC'
+        if 'function' in self.pointer:
+            return 'C_FUNCTION'
+
+        if 'call' in self.pointer:
+            return 'C_CALL'
 
         if 'push' in self.pointer:
             return 'C_PUSH'
@@ -98,16 +102,15 @@ class Parser:
         if 'goto' in self.pointer:
             return 'C_GOTO'
 
-        if 'function' in self.pointer:
-            return 'C_FUNCTION'
-
         if 'return' in self.pointer:
             return 'C_RETURN'
 
-        if 'call' in self.pointer:
-            return 'C_CALL'
+        for command in self.arithmetic_c:
+            if command in self.pointer:
+                return 'C_ARITHMETIC'
 
 
+    # @returns = first argument in VM line.
     def arg1(self):
 
         for command in self.arithmetic_c:
@@ -122,11 +125,18 @@ class Parser:
             return self.pointer[5:]
 
         if 'if-goto' in self.pointer:
-            return self.pointer[7:]
+            a_label = self.pointer[8:].replace(' ', '')
+            for label in self.labels:
+                if a_label in label:
+                    return label
 
-        if 'goto' in self.pointer:
-            return self.pointer[4:]
-        
+        elif 'goto' in self.pointer:
+            a_label = self.pointer[5:].replace(' ', '')
+            for label in self.labels:
+                if a_label in label:
+                    return label
+
+    # @returns = second argument in VM line if applicable.
     def arg2(self):
 
         ret = ''
@@ -135,4 +145,19 @@ class Parser:
                 ret += char
 
         return ret
+
+    # @returns = function name
+    # This is only called when Vm line calls function or is executing one.
+    def arg1func(self):
+
+        words = self.pointer.split()
+        return words[1]
+
+
+    # @returns = nVars or nArgs in function depending on VM line.
+    # Only called when VM line calls function or is executing one.
+    def arg2func(self):
+
+        words = self.pointer.split()
+        return int(words[2])
         

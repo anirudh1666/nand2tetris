@@ -1,0 +1,81 @@
+// This class handles drawing of the limbs of hangman.
+
+class Drawer {
+
+	field int num_empty;
+
+	constructor Drawer new(int len) {
+		
+		let num_empty = len;
+		do draw_empty_boxes(len);
+		do draw_stand();
+		return this;
+	}
+
+	method void draw_empty_boxes(int len) {
+		
+		let counter = 0;
+		let cur_x = 5;
+		while (counter < len) {
+			do Screen.drawRectangle(cur_x, 5, cur_x + 20, 25);
+			let cur_x = cur_x + 25;
+			let counter = counter + 1;
+		}
+		return;
+	}
+	
+	method void draw_stand() {
+		
+		do Screen.drawRectangle(345, 200, 450, 215);
+		do Screen.drawRectangle(345, 20, 360, 200);
+		do Screen.drawRectangle(345, 5, 400, 20);
+		do Screen.drawLine(400, 20, 400, 50);
+		return;
+	}
+	
+	method void draw_head() {
+		
+		do Screen.drawCircle(400, 75, 25);
+		return;
+	}
+
+	method void draw_body() {
+	
+		do Screen.drawRectangle(395, 100, 405, 150);
+		return;
+	}
+	
+	method void draw_right_arm() {
+		
+		do Screen.drawRectangle(405, 115, 425, 120);
+		return;
+	}
+
+	method void draw_left_arm() {
+	
+		do Screen.drawRectangle(375, 115, 395, 120);
+		return;
+	}
+
+	method void draw_right_leg() {
+
+		do Screen.drawRectangle(403, 150, 405, 180);
+		return;
+	}
+
+	method void draw_left_leg() {
+
+		do Screen.drawRectangle(395, 150, 397, 180);
+	}
+
+	method void draw_box(int line, int word_index) {
+		
+		let y_offset = (line * 25) + 5;
+		let x_offset = (word_index * 25) + 5;
+		do Screen.drawRectangle(x_offset, y_offset, x_offset + 20, y_offset + 20);
+	}
+	
+	method void draw_char(char c, int line, int word_index) {
+
+        }
+}

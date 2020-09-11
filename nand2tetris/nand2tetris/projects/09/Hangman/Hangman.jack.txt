@@ -1,0 +1,93 @@
+// Handles I/O and runs the game.
+
+class Hangman {
+
+	field Drawer draw;
+	field Array avail_chars;
+	field String word;
+	field int cur_line;
+
+	constructor Hangman new() {
+	
+		let cur_line = 1;
+		let word = "programming";
+		let draw = Drawer.new(word.length());
+		let avail_chars = ["a","b","c","d","e","f","g","h","i","j",
+				   "k","l","m","n","o","p","q","r","s","t",
+				   "u","v","w","x","y","z","!"];
+		return this;
+	}
+
+	method void run() {
+		
+		let finished = False;
+		let strikes = 0;
+		while(~(finished)) {
+			let valid_in = False;
+			
+			while (~(valid_in)) {
+				let c = Keyboard.readChar();
+				if (char_avail(c)) {
+					let valid_in = True;
+				}
+			}
+			
+			let strikes = check_char(c, strikes);
+			if ((draw.num_empty() = 0) | (strikes = 6)) {
+				let finished = True;
+			}
+		}
+
+		return;
+	}
+
+	// Checks if c in is available in array. If it is change it to _ and return True.
+	method boolean char_avail(char c) {
+
+		let counter = 0;
+		let index = -1;
+		while (~(avail_char[counter] = "!")) {
+			if (avail_char[counter] = c) {
+				let index = counter;
+			}
+			let counter = counter + 1;
+		}
+
+		if (index = -1) {
+			return False;
+		}
+		let avail_char[counter] = "_";
+		return True;
+	}
+
+	// Checks if char is in word. If it is then draw char else draw empty box.
+	// Also responsible for drawing boxes/ lines.
+	method int check_char(char c, int strikes) {
+
+		let counter = 0;
+		let len = word.length();
+		let found = False;
+		while (counter < len) {
+			if (word.charAt(counter) = c) {
+				draw.draw_char(c, cur_line, counter);
+				let found = True;
+			}
+			else {
+				draw.draw_box(curline, counter);
+			}
+			let counter = counter + 1;
+		}
+		if (found = False) {
+			let strikes = strikes + 1;
+			return strikes;
+		}
+		let cur_line = cur_line + 1;
+		return strikes;
+	}
+
+	method void dispose() {
+		
+		do avail_chars.dispose();
+		do word.dispose();
+		return;
+	}

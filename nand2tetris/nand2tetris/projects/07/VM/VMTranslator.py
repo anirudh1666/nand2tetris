@@ -10,8 +10,10 @@ import os, os.path
 def generate_code_dir(path, code):
 
     files = os.listdir(path)
+    code.write_init()         # First thing we do is init stack pointer and call sys.init function.
+        
     for file in files:
-        generate_code(file, code)
+        generate_code(path + '\\' + file, code)
 
 
 def generate_code(file, code):
@@ -35,8 +37,13 @@ def generate_code(file, code):
             code.write_if(parser.arg1())
         elif command_t == 'C_GOTO':
             code.write_goto(parser.arg1())
+        elif command_t == 'C_FUNCTION':
+            code.write_function(parser.arg1func(), parser.arg2func())
+        elif command_t == 'C_RETURN':
+            code.write_return()
+        elif command_t == 'C_CALL':
+            code.write_call(parser.arg1func(), parser.arg2func())
 
-    parser.print()
 
 # Run it by typing python VMTranslator.py filename.vm in cmd.
 path = sys.argv[1]
